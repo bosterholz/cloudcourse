@@ -1,8 +1,10 @@
-## A quick introduction of workflow managment systems
+## Workflow managment systems
 
 ### What have we done so far?
 
-Last time we 
+Last time we set up our own instance in the de.NBI cloud.
+We created volumes and mounted them to get a mean to store our data in a persistant fashion.
+
 
 ### Markdown
 
