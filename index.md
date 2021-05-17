@@ -1,8 +1,8 @@
-## Welcome to GitHub Pages
+## A quick introduction of workflow managment systems
 
-You can use the [editor on GitHub](https://github.com/bosterholz/cloudcourse/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+### What have we done so far?
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Last time we 
 
 ### Markdown
 
