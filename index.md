@@ -122,7 +122,22 @@ process blast {
   '''
 }
 ```
-On running this script Nextflow will use Anaconda and install BLAST. Then BLAST will be called and prompt its help page.
+On running this script Nextflow will use Anaconda and install BLAST. Then BLAST will be called and prompt its help page. 
 
+Perfekt, since BLAST is up and running the only missing parts are the database and input organisms. We will quickly solve this.
+
+```bash
+cd /vol/spool/cloud_computing
+mkdir input database
+wget -O input/clostridium_botulinum.fasta https://raw.githubusercontent.com/bosterholz/MeRaGENE/dev/data/test_data/genome/clostridium_botulinum.fasta
+cd database
+git clone https://github.com/bosterholz/MeRaGENE.git
+cd MeRaGENE
+git checkout -b remotes/origin/dev
+cd ..
+mv MeRaGENE/data/databases/resFinderDB_23082018/ .
+rm -rf MeRaGENE/
+cd /vol/spool/cloud_computing/nextflow
+```
 
 
