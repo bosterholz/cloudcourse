@@ -23,8 +23,51 @@ cd /vol/spool
 mkdir -p cloud_computing/nextflow
 cd cloud_computing/nextflow
 ```
+With this we created a directory `cloud_computing` which will be used to gather all our experiments. Simultaneously a directory `nextflow`
+was created and we jumped into it. Now we just need to install Nextflow locally and we are good to go.
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+```bash
+curl -s https://get.nextflow.io | bash
+```
+If everything went well you should see a prompt with the current version number and some additional informations.
+Here an example. Your version number should be equal or higher.
+
+```
+      N E X T F L O W
+      version 21.04.1 build 5556
+      created 14-05-2021 15:20 UTC 
+      cite doi:10.1038/nbt.3820
+      http://nextflow.io
+
+
+Nextflow installation completed. Please note:
+- the executable file `nextflow` has been created in the folder: /raid1/benedikt/cloud_computing/nextflow
+- you may complete the installation by moving it to a directory in your $PATH
+```
+Lets test our new installation. What could be better than a good old "hello world!" ?
+
+```bash
+./nextflow run hello
+```
+Shorter than you expected? Yes, because we are a lazzy bunch and cheated a little bit. Without a "hello" script in the same directory,
+Nextflow looked for a corresponding script on its github account. There it found something, checked it out using the integrated git module and started it locally. What you see are the results for running this script:
+
+```groovy
+#!/usr/bin/env nextflow
+
+cheers = Channel.from 'Bonjour', 'Ciao', 'Hello', 'Hola'
+
+process sayHello {
+  echo true
+  input: 
+    val x from cheers
+  script:
+    """
+    echo '$x world!'
+    """
+}
+
+```
 
 ### Jekyll Themes
 
