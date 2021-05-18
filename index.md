@@ -13,22 +13,15 @@ This is where we want to continue today and use the newly started cluster to tes
 The first candidate we will test is called [Nextflow](https://www.nextflow.io/). If you have questions or are stuck during the execises, just look
 at the [documentation](https://www.nextflow.io/docs/latest/index.html). The documentation is well written and can solve many questions quickly.
 
-```markdown
-Syntax highlighted code block
+#### Lets get started with Nextflow
 
-# Header 1
-## Header 2
-### Header 3
+At first we will prepare a workplace we can use. Since we will work and share data between all instances of our cluster, we need to use the only 
+directory wich is accessible from all instances: `/vol/spool`
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+```shell
+cd /vol/spool
+mkdir -p cloud_computing/nextflow
+cd cloud_computing/nextflow
 ```
 
 For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
