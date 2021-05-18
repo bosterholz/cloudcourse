@@ -98,7 +98,7 @@ In this case we just told Nextflow to use Slurm as its primary executor.
 
 #### Let's BLAST something  
 
-But a simple "hello world!" is just to boring. Let's do something more usefull. We will take a quick look at BLAST.
+But a simple "hello world!" is just to boring. Let's do something more usefull. We will take a quick look at [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi).
 
 The "Basic Local Alignment Search Tool" or BLAST is a bioinformatics tool to find regions of similarity between biological sequences. 
 The program compares nucleotide or protein sequences to sequence databases and calculates the statistical significance.
@@ -108,10 +108,21 @@ it is generally concerning. In case of an infection with this organism, the choi
 
 Another file with organisms will be downloaded. We will use BLAST to tell us which organisms contains antibiotic resistance genes from our database and need to be looked at more closely. 
 
-### Jekyll Themes
+But first things first. We need BLAST. We could install it localy on every instance in our cluster. But this would be a little bit tedious. We will use Nextflows build in support for the [Anaconda](https://www.anaconda.com/products/individual) package manager. You need to define which packages are needed for every single process, Nextflow will do the rest. If a package is missing on one of the instances Nextflow will fetch and install it for you. Just try it with BLAST. Open your favorite editor in your shell and create a `blast.nf` file with this content:
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/bosterholz/cloudcourse/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+```groovy
+#!/usr/bin/env nextflow
 
-### Support or Contact
+process blast {
+  conda 'bioconda::blast'
+  echo true
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+  '''
+  blastp -h    
+  '''
+}
+```
+On running this script Nextflow will use Anaconda and install BLAST. Then BLAST will be called and prompt its help page.
+
+
+
