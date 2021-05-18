@@ -44,6 +44,8 @@ Nextflow installation completed. Please note:
 - the executable file `nextflow` has been created in the folder: /raid1/benedikt/cloud_computing/nextflow
 - you may complete the installation by moving it to a directory in your $PATH
 ```
+
+#### Say hello!
 Lets test our new installation. What could be better than a good old "hello world!" ?
 
 ```bash
@@ -68,6 +70,43 @@ process sayHello {
 }
 
 ```
+It should look like this:
+
+```groovy
+N E X T F L O W  ~  version 21.04.1
+Launching `nextflow-io/hello` [boring_wilson] - revision: e6d9427e5b [master]
+executor >  local (4)
+[a5/b5f3bb] process > sayHello (1) [100%] 4 of 4 ✔
+Hola world!
+
+Ciao world!
+
+Hello world!
+
+Bonjour world!
+```
+Great! But as you can see this script was executed localy. We have multiple jobs and a whole cluster we could execute them on. Can't we share our jobs 
+between all our instances using the workload manager "Slurm" we installed with our cluster? Sure, we just have to tell Nextflow to use Slurm instead 
+of a local code execution. 
+
+```bash
+echo 'process.executor = "slurm"' > nextflow.config
+```
+
+With this we created the `nextflow.config` file. Nextflow will look for it during each run and use it to configure each run.
+In this case we just told Nextflow to use Slurm as its primary executor. 
+
+#### Let's BLAST something  
+
+But a simple "hello world!" is just to boring. Let's do something more usefull. We will take a quick look at BLAST.
+
+The "Basic Local Alignment Search Tool" or BLAST is a bioinformatics tool to find regions of similarity between biological sequences. 
+The program compares nucleotide or protein sequences to sequence databases and calculates the statistical significance.
+
+We will later download a database containing different antibiotic resistance genes. If an organism contains one or multiple of these genes 
+it is generally concerning. In case of an infection with this organism, the choice of potential treatment options is severely limited due to these resistances. 
+
+Another file with organisms will be downloaded. We will use BLAST to tell us which organisms contains antibiotic resistance genes from our database and need to be looked at more closely. 
 
 ### Jekyll Themes
 
