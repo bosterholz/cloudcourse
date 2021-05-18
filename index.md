@@ -8,9 +8,10 @@ The Openstack CLI was installed and used to get access to the cloud object stora
 At the end we used the bibigrid tool to set up our own compute cluster.
 This is where we want to continue today and use the newly started cluster to test different workflow managment systems.
 
-### Markdown
+### Nextflow
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+The first candidate we will test is called [Nextflow](https://www.nextflow.io/). If you have questions or are stuck during the execises, just look
+at the [documentation](https://www.nextflow.io/docs/latest/index.html). The documentation is well written and can solve many questions quickly.
 
 ```markdown
 Syntax highlighted code block
