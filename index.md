@@ -4,7 +4,9 @@
 
 Last time we set up our own instance in the de.NBI cloud.
 We created volumes and mounted them to get a mean to store our data in a persistant fashion.
-
+The Openstack CLI was installed and used to get access to the cloud object storage, another means to store data in the cloud.
+At the end we used the bibigrid tool to set up our own compute cluster.
+This is where we want to continue today and use the newly started cluster to test different workflow managment systems.
 
 ### Markdown
 
