@@ -157,3 +157,62 @@ Here a blast call template:
 blastx -db YOUR-DATABASE-FSA-FILE -query YOUR-INPUT-FASTA -out NAME-OF-YOUR-OUTPUT
 ```
 Whith this you should be good to go! Good luck!
+
+### Sankemake
+
+#### Setup
+
+```
+cd /vol/spool/cloud_computing
+mkdir snakemake
+cd snakemake/
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+bash Mambaforge-Linux-x86_64.sh
+```
+Enter-Yes- Path: /vol/spool/cloud_computing/snakemake/mamba - NO
+
+```
+wget https://github.com/snakemake/snakemake-tutorial-data/archive/v5.24.1.tar.gz
+tar --wildcards -xf v5.24.1.tar.gz --strip 1 "*/data" "*/environment.yaml"
+```
+Add   - blast =2.11 to environment.
+
+```
+source /vol/spool/cloud_computing/snakemake/mamba/bin/activate base
+mamba env create --name snakemake --file environment.yaml
+source /vol/spool/cloud_computing/snakemake/mamba/bin/activate snakemake
+```
+Start with tutorial 
+```
+rule bwa_map:
+    input:
+        "data/genome.fa",
+        "data/samples/A.fastq"
+    output:
+        "mapped_reads/A.bam"
+    shell:
+        "bwa mem {input} | samtools view -Sb - > {output}"
+```
+`snakemake -np mapped_reads/A.bam`
+
+`snakemake --cores 1 mapped_reads/A.bam`
+
+```
+rule bwa_map:
+    input:
+        "data/genome.fa",
+        "data/samples/{sample}.fastq"
+    output:
+        "mapped_reads/{sample}.bam"
+    shell:
+        "bwa mem {input} | samtools view -Sb - > {output}"
+```
+`snakemake -np mapped_reads/B.bam`
+
+`snakemake -np mapped_reads/A.bam mapped_reads/B.bam`
+
+`snakemake -np mapped_reads/{A,B}.bam`
+
+Try ist with blast
+
+```
