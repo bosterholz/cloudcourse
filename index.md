@@ -145,8 +145,11 @@ You can now build your own BLAST pipeline using Nextflow. Let me give you some t
 Here are some important Nextflow code snippets you will need:
 
 [How do I use files or a whole folder as input?](https://www.nextflow.io/docs/latest/process.html#input-of-files)
+
 [We have multiple database files, how do we use EACH of them?](https://www.nextflow.io/docs/latest/process.html#inputs)
+
 [How do I handle my output?](https://www.nextflow.io/docs/latest/process.html#output-files)
+
 [How do I get my output in a file?](https://www.nextflow.io/docs/latest/operator.html?highlight=collect#collectfile)
 
 Here a blast call template:
