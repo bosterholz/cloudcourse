@@ -3,7 +3,7 @@
 ### What have we done so far?
 
 Last time we set up our own instance in the de.NBI cloud.
-We created volumes and mounted them to get a mean to store our data in a persistent fashion.
+We created volumes and mounted them to get an option to store our data in a persistent fashion.
 The Openstack CLI was installed and used to get access to the cloud object storage, another means to store data in the cloud.
 At the end we used the bibigrid tool to set up our own compute cluster.
 This is where we want to continue today and use the newly started cluster to test different workflow management systems.
@@ -52,7 +52,7 @@ Lets test our new installation. What could be better than a good old "hello worl
 ./nextflow run hello
 ```
 Shorter than you expected? Yes, because we are a lazy bunch and cheated a little bit. Without a "hello" script in the same directory,
-Nextflow looked for a corresponding script on its github account. There it found something, checked it out using the integrated git module and started it locally. What you see are the results for running this script:
+Nextflow looked for a corresponding script on its github account. There it found something, cloned it using the integrated git module and started it locally. What you see are the results for running this script:
 
 ```groovy
 #!/usr/bin/env nextflow
@@ -104,9 +104,9 @@ The "Basic Local Alignment Search Tool" or BLAST is a bioinformatics tool to fin
 The program compares nucleotide or protein sequences to sequence databases and calculates the statistical significance.
 
 We will later download a database containing different antibiotic resistance genes. If an organism contains one or multiple of these genes 
-it is generally concerning. In case of an infection with this organism, the choice of potential treatment options is severely limited due to these resistances. 
+it is generally concerning. In case of an infection with this organism, the choice of potential treatment options could be severely limited due to these resistances. 
 
-Another file with organisms will be downloaded. We will use BLAST to tell us which organisms contains antibiotic resistance genes from our database and need to be looked at more closely. 
+Another file with organisms will be downloaded. We will use BLAST to tell us which organisms contain antibiotic resistance genes from our database and need to be looked at more closely. 
 
 But first things first. We need BLAST. We could install it locally on every instance in our cluster. But this would be a little bit tedious. We will use Nextflows build in support for the [Anaconda](https://www.anaconda.com/products/individual) package manager. You need to define which packages are needed for every single process, Nextflow will do the rest. If a package is missing on one of the instances Nextflow will fetch and install it for you. Just try it with BLAST. Open your favorite editor in your shell and create a `blast.nf` file with this content:
 
@@ -117,9 +117,9 @@ process blast {
   conda 'bioconda::blast'
   echo true
 
-  '''
+  """
   blastp -h    
-  '''
+  """
 }
 ```
 On running this script Nextflow will use Anaconda and install BLAST. Then BLAST will be called and prompt its help page. 
@@ -133,11 +133,24 @@ wget -O input/clostridium_botulinum.fasta https://raw.githubusercontent.com/bost
 cd database
 git clone https://github.com/bosterholz/MeRaGENE.git
 cd MeRaGENE
-git checkout -b remotes/origin/dev
+git checkout dev
 cd ..
 mv MeRaGENE/data/databases/resFinderDB_23082018/ .
 rm -rf MeRaGENE/
+rm resFinderDB_23082018/*_NA*
 cd /vol/spool/cloud_computing/nextflow
 ```
-Since everything is ready, can you build a working BLAST script?
+You can now build your own BLAST pipeline using Nextflow. Let me give you some tipps, so that you can get a head start.
 
+Here are some important Nextflow code snippets you will need:
+
+[How do I use files or a whole folder as input?](https://www.nextflow.io/docs/latest/process.html#input-of-files)
+[We have multiple database files, how do we use EACH of them?](https://www.nextflow.io/docs/latest/process.html#inputs)
+[How do I handle my output?](https://www.nextflow.io/docs/latest/process.html#output-files)
+[How do I get my output in a file?](https://www.nextflow.io/docs/latest/operator.html?highlight=collect#collectfile)
+
+Here a blast call template:
+```
+blastx -db YOUR-DATABASE-FSA-FILE -query YOUR-INPUT-FASTA -out NAME-OF-YOUR-OUTPUT
+```
+Whith this you should be good to go! Good luck!
