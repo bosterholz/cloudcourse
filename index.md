@@ -174,20 +174,25 @@ bash Mambaforge-Linux-x86_64.sh
 ```
 You will see a dialogue during the installation of Snakemake. Press ENTER, answear the license agreament with YES.
 Then change the installation path to: `/vol/spool/cloud_computing/snakemake/mamba`. We don't want to initialise conda so we will type NO.
-Now we 
+Now we need the tutorial data, we download and extract everything with: 
 
 ```
 wget https://github.com/snakemake/snakemake-tutorial-data/archive/v5.24.1.tar.gz
 tar --wildcards -xf v5.24.1.tar.gz --strip 1 "*/data" "*/environment.yaml"
 ```
-Add   - blast =2.11 to environment.
+After a quick introduction into Snakemake we will try to replicate our BLAST example. To make things easier we add BLAST to our downloaded `environment.yml`. These are packages which will be installed at the start of a new initialisation. So we will start with an installed BLAST and don't need to add it later on. 
 
+Again, open the `environment.yml` with your favorite editor and add `- blast =2.11` at the beginning of your package list.
+Now we initialize our environment:
 ```
 source /vol/spool/cloud_computing/snakemake/mamba/bin/activate base
 mamba env create --name snakemake --file environment.yaml
 source /vol/spool/cloud_computing/snakemake/mamba/bin/activate snakemake
 ```
-Start with tutorial 
+#### Let's start with Snakemake
+
+You should now be able to use the `Snakemake` command in your bash. It would be a little bit boring to start with `hello world` for the second time, so we will look at an easy but real bioinformatic tool call. Create a file called `snakefile` and fill it with:
+
 ```
 rule bwa_map:
     input:
@@ -198,9 +203,16 @@ rule bwa_map:
     shell:
         "bwa mem {input} | samtools view -Sb - > {output}"
 ```
+All the data we need we downloaded in the previous steps. We can immediatly start calling Snakemake. In Snakemake we start with a so called dry run.
+Snakemake will look if everything is in order and print every paths it will create or tell us of problems it encountered. 
+
 `snakemake -np mapped_reads/A.bam`
 
+Everything should be okay. We start the real run with:
+
 `snakemake --cores 1 mapped_reads/A.bam`
+
+This was a real static run. Is there a way to do it in a more dynamic fashion? Yes, of course. Just change your `snakefile` like you see below.
 
 ```
 rule bwa_map:
@@ -212,15 +224,18 @@ rule bwa_map:
     shell:
         "bwa mem {input} | samtools view -Sb - > {output}"
 ```
+Now try these dry runs:
+
 `snakemake -np mapped_reads/B.bam`
 
 `snakemake -np mapped_reads/A.bam mapped_reads/B.bam`
 
 `snakemake -np mapped_reads/{A,B}.bam`
 
-Try ist with blast
+Do you see what happens? Try running these for real. Are there Problems? 
 
-```
+You should now know enough to replicate our Nextflow BLAST call with Snakemake. Try it!
+
 
 ### Common Workflow Language (CWL)
 CWL is not a software, but rather a standard for describing data analysis workflows. A range of different workflow engines can be used to execute CWL-workflows. We call these workflow engines “cwl-runners”, but some of them are compatible to other workflow languages as well.
