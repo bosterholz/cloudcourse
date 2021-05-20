@@ -140,7 +140,7 @@ rm -rf MeRaGENE/
 rm resFinderDB_23082018/*_NA*
 cd /vol/spool/cloud_computing/nextflow
 ```
-You can now build your own BLAST pipeline using Nextflow. Let me give you some tipps, so that you can get a head start.
+You can now build your own BLAST pipeline using Nextflow. Let me give you some tips, so that you can get a head start.
 
 Here are some important Nextflow code snippets you will need:
 
@@ -160,7 +160,7 @@ Whith this you should be good to go! Good luck!
 
 ### Sankemake
 
-After we got a quick glimpse on how to handle Nextflow, we will test our secound candidate today: [Snakemake](https://snakemake.github.io/)
+After we got a quick glimpse on how to handle Nextflow, we will test our second candidate today: [Snakemake](https://snakemake.github.io/)
 
 #### Setup
 
@@ -172,15 +172,15 @@ cd snakemake/
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
 bash Mambaforge-Linux-x86_64.sh
 ```
-You will see a dialogue during the installation of Snakemake. Press ENTER, answear the license agreament with YES.
-Then change the installation path to: `/vol/spool/cloud_computing/snakemake/mamba`. We don't want to initialise conda so we will type NO.
+You will see a dialogue during the installation of Snakemake. Press ENTER, answer the license agreement with YES.
+Then change the installation path to: `/vol/spool/cloud_computing/snakemake/mamba`. We don't want to initialize conda so we will type NO.
 Now we need the tutorial data, we download and extract everything with: 
 
 ```
 wget https://github.com/snakemake/snakemake-tutorial-data/archive/v5.24.1.tar.gz
 tar --wildcards -xf v5.24.1.tar.gz --strip 1 "*/data" "*/environment.yaml"
 ```
-After a quick introduction into Snakemake we will try to replicate our BLAST example. To make things easier we add BLAST to our downloaded `environment.yml`. These are packages which will be installed at the start of a new initialisation. So we will start with an installed BLAST and don't need to add it later on. 
+After a quick introduction into Snakemake we will try to replicate our BLAST example. To make things easier we add BLAST to our downloaded `environment.yml`. These are packages which will be installed at the start of a new initialization. So we will start with an installed BLAST and don't need to add it later on. 
 
 Again, open the `environment.yml` with your favorite editor and add `- blast =2.11` at the beginning of your package list.
 Now we initialize our environment:
@@ -203,7 +203,7 @@ rule bwa_map:
     shell:
         "bwa mem {input} | samtools view -Sb - > {output}"
 ```
-All the data we need we downloaded in the previous steps. We can immediatly start calling Snakemake. In Snakemake we start with a so called dry run.
+All the data we need we downloaded in the previous steps. We can immediately start calling Snakemake. In Snakemake we start with a so called dry run.
 Snakemake will look if everything is in order and print every paths it will create or tell us of problems it encountered. 
 
 `snakemake -np mapped_reads/A.bam`
