@@ -160,8 +160,11 @@ Whith this you should be good to go! Good luck!
 
 ### Sankemake
 
+After we got a quick glimpse on how to handle Nextflow, we will test our secound candidate today: [Snakemake](https://snakemake.github.io/)
+
 #### Setup
 
+Let's set it up: 
 ```
 cd /vol/spool/cloud_computing
 mkdir snakemake
@@ -169,7 +172,9 @@ cd snakemake/
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
 bash Mambaforge-Linux-x86_64.sh
 ```
-Enter-Yes- Path: /vol/spool/cloud_computing/snakemake/mamba - NO
+You will see a dialogue during the installation of Snakemake. Press ENTER, answear the license agreament with YES.
+Then change the installation path to: `/vol/spool/cloud_computing/snakemake/mamba`. We don't want to initialise conda so we will type NO.
+Now we 
 
 ```
 wget https://github.com/snakemake/snakemake-tutorial-data/archive/v5.24.1.tar.gz
@@ -215,4 +220,201 @@ rule bwa_map:
 
 Try ist with blast
 
+```
+
+### Common Workflow Language (CWL)
+CWL is not a software, but rather a standard for describing data analysis workflows. A range of different workflow engines can be used to execute CWL-workflows. We call these workflow engines “cwl-runners”, but some of them are compatible to other workflow languages as well.
+
+#### Basic Concepts
+CWL is used to describe two types of document: *CommandLineTool* and *Workflow*.
+A *CommandLineTool* describes a single tool that can be invoked from the command line, like `echo` or `blast`. Based on this description, a cwl-runner is able to execute the tool.
+A *Workflow* is used to link multiple CommandLineTools (or other workflows), describing the flow of data between them.
+A cwl-runner also needs to know which input to feed into a tool or workflow. This is done with a job file, where inputs are described in the YAML-format.
+
+#### Toil 
+For the purpose of executing our CWL code, we will be using the [Toil ](https://toil.readthedocs.io/en/latest/) workflow engine. To install Toil (and blast) in a virtual environment, we will use a conda. Toil has several optional features, and the ability to interpret CWL code is one of them. So we have to specify that we want to install the cwl-feature when wie install Toil.
+
+
+```bash
+cd /vol/spool/cloud_computing
+mkdir miniconda
+cd miniconda
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+```
+Accept the license (scroll through the text with ENTER, then type `yes`) and specify the installation path as `/vol/spool/cloud_computing/miniconda/inst`. Type `no` when asked about conda init. We will now activate our conda virtual environment, create another virtual environment for our work with CWL and install toil and blast.
+
+```bash
+source inst/bin/activate
+conda create --name cwl
+conda activate cwl
+conda install pip
+pip install toil[cwl] boto boto3
+conda install -c bioconda blast
+```
+
+
+
+
+#### Running a CWL Workflow
+We need a piece of CWL code for toil to execute. Once again, we will work in `/vol/spool` so data will be available across all nodes.
+```bash
+cd /vol/spool
+mkdir -p cloud_computing/cwl
+cd cloud_computing/cwl
+```
+
+Paste the following into a text file named `exampleTool.cwl`:
+```
+#!/usr/bin/env cwl-runner
+
+cwlVersion: v1.2                 #Toil can handle different versions of the CWL-specification.
+class: CommandLineTool
+baseCommand: echo
+
+requirements:
+  InlineJavascriptRequirement: {}
+
+inputs:
+  message:                       #Name of our first (and only) input
+    type: string                 #The type of the input
+    inputBinding:
+      position: 1                #Determines the order of inputs on the command line
+
+outputs:                         #Here we tell the CommandLineTool which outputs to collect
+  answer:                        #The internal name of our first (and only) output file
+    type: stdout                 #Echo writes to stdout, so we have to capture standard output 
+    
+stdout: $(inputs.message).txt    #The standard output we have captured will be written to a file.
+                                 #(in this case, the input string with the suffix ".txt")
+```
+Paste the following into a text file named `exampleJob.yml`:
+```
+message: "Hello"
+message2: "Hallo"
+message3: "Bonjour"
+message4: "Hola"
+```
+Now execute the CWL code on the local machine using Toil:
+```bash
+mkdir myWorkdir
+toil-cwl-runner --workDir myWorkdir --outdir myOutputs --clean always exampleTool.cwl exampleJob.yml
+```
+
+Toil will run the code in example.cwl, using the input specified in `exampleJob.yml` and save the results to myOutputs. We specified four different input strings in our `exampleJob.yml`, but `exampleTool.cwl` will only use the input specified behind `message`. Your output should turn up in the `myOutputs` directory.
+
+
+#### Running a Workflow
+Lets save a multi-step CWL-workflow into a file `exampleWorkflow.cwl` so Toil has multiple jobs to run.
+```
+#!/usr/bin/env cwl-runner
+
+cwlVersion: v1.2
+class: Workflow
+
+inputs:                          #The different inputs to our workflow, each has a name and a type (string)
+  message: string                
+  message2: string
+  message3: string
+  message4: string
+
+steps:                           #A list of steps the workflow has to carry out. Toil will decide the order of steps.
+  print1:                        #The internal name of the first step
+    run: exampleTool.cwl         #The CommandLineTool that we will run in the first step
+    in:                          #The input that the workflow will feed into the first step
+      message: message           
+    out: [answer]
+  print2:
+    run: exampleTool.cwl
+    in:
+      message: message2          #Our CommandLineTool expects an input for the "message" parameter. We provide the "message2" string from our workflow inputs
+    out: [answer] 
+  print3:
+    run: exampleTool.cwl
+    in:
+      message: message3
+    out: [answer]                #A list of outputs that the workflow will collect from the CommandLineTool. We specified the name "answer" in the CommandLineTool above
+  print4:
+    run: exampleTool.cwl
+    in:
+      message: message4
+    out: [answer] 
+    
+outputs:                         #The outputs our workflow will create
+  text1:                         #The internal name of the first of four outputs
+    type: File                   #The type of the output. We know that our CommandLineTool will create a file
+    outputSource: print1/answer  #Where the fetch the output (in this case from the print1 step). Answer is the internal name we have given to the output earlier
+  text2:
+    type: File
+    outputSource: print2/answer
+  text3:
+    type: File
+    outputSource: print3/answer
+  text4:
+    type: File
+    outputSource: print4/answer
+    
+```
+Now submit the job to your slurm cluster like this:
+```bash
+toil-cwl-runner --batchSystem slurm --disableCaching --jobStore myJobstore --workDir myWorkdir --outdir myOutputs --clean always exampleWorkflow.cwl exampleJob.yml
+```
+Again, all your outputs should show up in `myOutputs`
+
+#### Blast Tool
+Like before we want to use blast to look for antibiotic resistances in the *Clostridium botulinum* genome. The genome will be our blast query, the individual antibiotic genes are the databases we want to search. Doing this on the command line for a single resistance gene might look like this:
+
+```bash
+blastx -query /vol/spool/cloud_computing/input/clostridium_botulinum.fasta -db /vol/spool/cloud_computing/resFinderDB_23082018/tetracycline_NA.fsa
+```
+Try to create a CWL CommandLineTool that can be used for this kind of blast search. It should be able to process the following job file:
+```
+target_fasta:
+  class: File
+  path: /vol/spool/cloud_computing/input/clostridium_botulinum.fasta
+query_fasta:
+  class: File
+  path: /vol/spool/cloud_computing/resFinderDB_23082018/tetracycline_AA.fsa
+```
+For this task, it is important to know that the blast database for the tetracycline sequence actually consists of four files:
+- tetracycline_NA.fsa
+- tetracycline_NA.fsa.phr
+- tetracycline_NA.fsa.pin
+- tetracycline_NA.fsa.psq
+
+Our CWL runner needs to know that files 2, 3 and 4 contain information pertaining to our primary file and blast expects to find them in the same directory. For this reason, we need to specify the `secondaryFiles` property for our input parameter.
+```
+someInputParameter:
+  type: File
+  inputBinding:
+    position: 5
+    prefix: -somePrefix
+  secondaryFiles
+  - .phr
+  - .pin
+  - .psq
+```
+This tells the CWL runner to look for Files that have the same basename as the input parameter, but end in .phr, .pin or .psq.<br>
+The [CWL User Guide](https://www.commonwl.org/user_guide/) provides an excellent introduction into writing CWL and you may also use it to look up individual topics.<br>
+When you have written your CommandLineTool, try using toil to run it with the job file that was specified in this section.
+
+#### Docker
+Using docker images to run our tools in containers solves a lot of problems for us. The first advantage is that we do not have to install software (like blast) on every node that processes our jobs. It also makes our workflows more robust and analyses will be easier to reproduce, since the software will always be carried out in an environment that is exactly identical. You can add the following code to your CommandLineTool to use docker.
+```
+hints:
+  DockerRequirement:
+    dockerPull: ncbi/blast:2.11.0
+```
+Now, when you run this tool, the CWL-runner will test if docker is available on the system. If it is, the runner will download a docker image that can run version 2.11.0 of the blast software.
+
+#### Blast Workflow
+Look at the examples for [writing workflows](https://www.commonwl.org/user_guide/21-1st-workflow/index.html) and [scattering workflows](https://www.commonwl.org/user_guide/23-scatter-workflow/index.html) from the CWL User Guide. Can you build a workflow that uses your blast CommandLineTool to blast against multiple antibiotic resistance sequences? Use the following job file:
+```
+query_fasta:
+  class: File
+  path: /mnt/huge/cloud-kurs/input/clostridium_botulinum.fasta
+database_array:
+- {class: File, path: /vol/spool/cloud_computing/resFinderDB_23082018/aminoglycoside_AA.fsa }
+- {class: File, path: /vol/spool/cloud_computing/resFinderDB_23082018/beta-lactam_AA.fsa }
+- {class: File, path: /vol/spool/cloud_computing/cloud-kurs/resFinderDB_23082018/colistin_AA.fsa }
 ```
